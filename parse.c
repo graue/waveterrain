@@ -22,14 +22,14 @@ static char *nexttoken(const char *str, int *skipped)
 	static char buf[999];
 	int len = 0;
 
-	while (buf[len] != '\0' && !isignored(buf[len])
+	while (str[len] != '\0' && !isignored(str[len])
 		&& len+1 < (int)sizeof buf)
 	{
 		len++;
 	}
 
 	memcpy(buf, str, len);
-	buf[len+1] = '\0';
+	buf[len] = '\0';
 	if (skipped != NULL) *skipped = len;
 
 	return buf;
@@ -48,10 +48,10 @@ expr_t *parse(const char *str, int *skipped)
 	int ix;
 
 	// skip leading spaces
-	while (*p != '\0' && !isignored(*p))
+	while (*p != '\0' && isignored(*p))
 		p++;
 
-	token = nexttoken(str, &numskipped);
+	token = nexttoken(p, &numskipped);
 	p += numskipped;
 	if (token[0] == '\0')
 		return NULL;
