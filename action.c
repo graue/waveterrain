@@ -14,6 +14,11 @@ void action_init(void)
 	// TODO: init expressions etc.
 }
 
+void action_control(float rotation)
+{
+	// TODO
+}
+
 void action_writesamples(int fd, int numframes)
 {
 	// TODO
@@ -26,6 +31,7 @@ void action_writesamples(int fd, int numframes)
 	*bufp = color; \
 }
 
+// surface should be locked (if needed) prior to calling this
 void action_dodisplay(SDL_Surface *disp, int w, int h)
 {
 	// TODO
