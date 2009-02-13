@@ -18,6 +18,7 @@ float x, y; // current location of pickup over terrain
 float angledeg; // angle, in degrees, that pickup is moving
 float angleturn; // current angle turn speed in signed degrees/sec
 float speed; // speed which pickup moves PER SECOND
+float amp; // overall gain (multiplier, not dB)
 
 static const char *terrain_expr_str = 
 "(+ (+ (+ (sin (* (* 2 pi ) y))"
@@ -29,9 +30,18 @@ static const char *terrain_expr_str =
 "      (+ (sin (* (* 2 pi ) (* y 7))"
 "         (sin (* (* 2 pi ) (* x 8)))))))";
 
+// returns values in [-1, 1]
 static float eval_terrain_at(float x, float y)
 {
-	return sin(evaluate(terrain, x, y, 0.0 /* time not used */));
+	float f;
+
+	f = amp * evaluate(terrain, x, y, 0.0 /* time not used */);
+
+	// clip
+	if (f < -1.0) f = -1.0;
+	else if (f > 1.0) f = 1.0;
+
+	return f;
 }
 
 FILE *audiodump;
@@ -45,6 +55,7 @@ void action_init(void)
 	angledeg = 0.0;
 	angleturn = 360.0;
 	speed = 500.0;
+	amp = DBTORAT(-10.0);
 
 	audiodump = fopen("audiodump.f32", "wb");
 }
@@ -121,11 +132,6 @@ void action_dodisplay(SDL_Surface *disp, int w, int h, int lines)
 	{
 		f = eval_terrain_at(planeleft + scrx*scrtoplanemul,
 			planetop + scry*scrtoplanemul);
-
-		// XXX this SHOULDN'T really be necessary if eval_terrain_at
-		// returns values in [-1.0, 1.0] as it ought to
-		if (f < -1.0) f = -1.0;
-		if (f > 1.0) f = 1.0;
 
 		f += 1.0;
 		f *= 255.9 / 2.0;
