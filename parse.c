@@ -30,6 +30,9 @@ static char *nexttoken(const char *str, int *skipped)
 	return buf;
 }
 
+#undef PI
+#define PI 3.14159265359 /* close enough */
+
 expr_t *parse(const char *str, int *skipped)
 {
 	const char *p = str;
@@ -54,6 +57,14 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = atof(token);
+		*skipped = p - str;
+		return myexpr;
+	}
+
+	if (!strcmp(token, "pi"))
+	{
+		myexpr->type = EXPR_CONSTANT;
+		myexpr->details.num = PI;
 		*skipped = p - str;
 		return myexpr;
 	}
