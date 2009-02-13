@@ -18,7 +18,9 @@ const operator_t opers[] =
 	{ "/", 2, { .func2 = divide }},
 	{ "%", 2, { .func2 = mod }},
 	{ "sin", 1, { .func1 = sinf }},
-	{ "cos", 1, { .func1 = cosf }}
+	{ "cos", 1, { .func1 = cosf }},
+	{ "floor", 1, { .func1 = floorf }},
+	{ "ceil", 1, { .func1 = ceilf }}
 };
 
 const int numopers = sizeof opers / sizeof opers[0];
