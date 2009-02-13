@@ -20,13 +20,13 @@ float speed; // speed which pickup moves PER SECOND
 
 static const char *terrain_expr_str = 
 "(+ (+ (+ (sin (* (* 2 pi ) y))"
-"         (sin (* (* 2 pi ) (* y 2)))"
+"         (sin (* (* 2 pi ) (* x 2)))"
 "      (+ (sin (* (* 2 pi ) (* y 3))"
-"         (sin (* (* 2 pi ) (* y 4)))))"
+"         (sin (* (* 2 pi ) (* x 4)))))"
 "   (+ (+ (sin (* (* 2 pi ) (* y 5)))"
-"         (sin (* (* 2 pi ) (* y 6)))"
+"         (sin (* (* 2 pi ) (* x 6)))"
 "      (+ (sin (* (* 2 pi ) (* y 7))"
-"         (sin (* (* 2 pi ) (* y 8)))))))";
+"         (sin (* (* 2 pi ) (* x 8)))))))";
 
 static float eval_terrain_at(float x, float y)
 {
