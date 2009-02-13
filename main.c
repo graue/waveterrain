@@ -3,6 +3,7 @@
 #include <poll.h>
 #include <err.h>
 #include "SDL.h"
+#include "mt.h"
 #include "main.h"
 #include "ctimer.h"
 #include "sndlib.h"
@@ -79,6 +80,7 @@ int main(int argc, char *argv[])
 	mustlock = SDL_MUSTLOCK(screen);
 	action_init();
 	lasttime = get_usecs();
+	mt_init((u_int32_t)lasttime);
 
 	for (;;)
 	{
