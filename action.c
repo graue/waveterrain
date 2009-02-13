@@ -20,6 +20,9 @@ float angleturn; // current angle turn speed in signed degrees/sec
 float speed; // speed which pickup moves PER SECOND
 float amp; // overall gain (multiplier, not dB)
 
+#define MAXAMPDB -10
+#define AMPDBRANGE 40
+
 static const char *terrain_expr_str = 
 "(+ (+ (+ (sin (* (* 2 pi ) y))"
 "         (sin (* (* 2 pi ) (* x 2)))"
@@ -55,7 +58,7 @@ void action_init(void)
 	angledeg = 0.0;
 	angleturn = 360.0;
 	speed = 500.0;
-	amp = DBTORAT(-10.0);
+	amp = DBTORAT(MAXAMPDB - AMPDBRANGE);
 
 	audiodump = fopen("audiodump.f32", "wb");
 }
@@ -63,10 +66,11 @@ void action_init(void)
 // max angle turn change in degrees/sec/sec
 #define ANGLE_ACCEL 10.0
 
-// rotation is [-1.0, 1.0]
-void action_control(float rotation)
+// each axis is [-1.0, 1.0]
+void action_control(float rotation, float lever, float updn, float lr)
 {
 	angleturn += ANGLE_ACCEL * rotation;
+	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);
 }
 
 void action_writesamples(int numframes)

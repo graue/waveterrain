@@ -184,7 +184,10 @@ int take_joystick_input(SDL_Joystick *joy)
 	if (buttons == JOYBTN_QUIT)
 		return 1;
 
-	action_control(scaledjoyaxis(joy, JOYAXIS_ROTATE));
+	action_control(scaledjoyaxis(joy, JOYAXIS_ROTATE),
+		scaledjoyaxis(joy, JOYAXIS_BASE),
+		scaledjoyaxis(joy, JOYAXIS_UPDN),
+		scaledjoyaxis(joy, JOYAXIS_LR));
 
 	return 0;
 }
