@@ -1,0 +1,5 @@
+#!/bin/sh
+cc -ggdb -W -Wall -lm \
+ `~/sdltemp/bin/sdl-config --cflags --libs` \
+ -I/usr/local/include -L/usr/local/lib -I/usr/X11R6/include -L/usr/X11R6/lib \
+ -o terrain *.c
