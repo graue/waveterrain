@@ -14,7 +14,11 @@
 #define DBTORAT(x) exp((x) * M_LN10_OVER_20)
 #define DC_OFFSET 1.19209290E-07F /* <float.h>'s FLT_EPSILON */
 
-expr_t *terrain;
+#define MAXTERRAINS 100
+expr_t *terrains[MAXTERRAINS];
+int numterrains = 0;
+int tindex = 0; // current terrain
+
 float x, y; // current location of pickup over terrain
 float angledeg; // angle, in degrees, that pickup is moving
 float angleturn; // current angle turn speed in signed degrees/sec
@@ -24,22 +28,26 @@ float amp; // overall gain (multiplier, not dB)
 #define MAXAMPDB -10
 #define AMPDBRANGE 40
 
-static const char *terrain_expr_str = 
-"(+ (+ (+ (sin (* (* 2 pi ) y))"
-"         (sin (* (* 2 pi ) (* x 2)))"
-"      (+ (sin (* (* 2 pi ) (* y 3))"
-"         (sin (* (* 2 pi ) (* x 4)))))"
-"   (+ (+ (sin (* (* 2 pi ) (* y 5)))"
-"         (sin (* (* 2 pi ) (* x 6)))"
-"      (+ (sin (* (* 2 pi ) (* y 7))"
-"         (sin (* (* 2 pi ) (* x 8)))))))";
+// returns 1 if success 0 if fail
+static int addterrain(const char *expr_str, int *skipped)
+{
+	if (numterrains == MAXTERRAINS)
+		return 0;
+	terrains[numterrains] = parse(expr_str, skipped);
+	if (terrains[numterrains] == NULL)
+		return 0;
+	numterrains++;
+	return 1;
+}
+
+char terrainexprbuf[102400];
 
 // returns values in [-1, 1]
 static float eval_terrain_at(float x, float y)
 {
 	float f;
 
-	f = amp * evaluate(terrain, x, y, 0.0 /* time not used */);
+	f = amp * evaluate(terrains[tindex], x, y, 0.0 /* time not used */);
 
 	// clip
 	if (f < -1.0) f = -1.0;
@@ -52,9 +60,27 @@ FILE *audiodump;
 
 void action_init(void)
 {
-	terrain = parse(terrain_expr_str, NULL);
-	if (terrain == NULL)
-		errx(1, "terrain string wouldn't parse");
+	int numskipped;
+	const char *p;
+	FILE *fp;
+
+	memset(terrainexprbuf, 0, sizeof terrainexprbuf);
+	fp = fopen("terrains.txt", "r");
+	if (fp == NULL)
+		err(1, "fopen terrains.txt");
+	fread(terrainexprbuf, 1, sizeof terrainexprbuf - 1, fp);
+	fclose(fp);
+	p = terrainexprbuf;
+
+	while (addterrain(p, &numskipped))
+		p += numskipped;
+
+	if (numterrains == 0)
+		errx(1, "no valid terrains");
+
+	fprintf(stderr, "loaded %d terrains\n", numterrains);
+
+	tindex = 0;
 	x = y = 0.0;
 	angledeg = 0.0;
 	angleturn = 360.0;
@@ -75,11 +101,18 @@ void action_control(float rotation, float lever, float updn, float lr,
 	int newbuttons;
 
 	newbuttons = buttons & (~lastbuttons);
+	lastbuttons = buttons;
+
 	if (newbuttons & JOYBTN_1)
-		mutate(terrain);
+		mutate(terrains[tindex]);
+	if (newbuttons & JOYBTN_3)
+		tindex = (tindex+numterrains-1) % numterrains;
+	if (newbuttons & JOYBTN_4)
+		tindex = (tindex+1) % numterrains;
 
 	angleturn += ANGLE_ACCEL * rotation;
 	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);
+	if (updn != 0.0) speed *= pow(2, updn);
 }
 
 void action_writesamples(int numframes)
