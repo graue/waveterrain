@@ -6,6 +6,7 @@
 #include "main.h"
 #include "expr.h"
 #include "parse.h"
+#include "mutate.h"
 
 #define M_20_OVER_LN10 8.68588963806503655302257838
 #define M_LN10_OVER_20 0.115129254649702284200899573
@@ -70,6 +71,13 @@ void action_init(void)
 void action_control(float rotation, float lever, float updn, float lr,
 	int buttons)
 {
+	static int lastbuttons = 0;
+	int newbuttons;
+
+	newbuttons = buttons & (~lastbuttons);
+	if (newbuttons & JOYBTN_1)
+		mutate(terrain);
+
 	angleturn += ANGLE_ACCEL * rotation;
 	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);
 }
