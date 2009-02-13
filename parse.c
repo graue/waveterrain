@@ -150,7 +150,7 @@ expr_t *parse(const char *str, int *skipped)
 			}
 			myexpr->depthcount++;
 #ifdef PARSE_DEBUG
-		fprintf(stderr, " )");
+			fprintf(stderr, " )");
 #endif
 			if (skipped != NULL) *skipped = p - str;
 			return myexpr;
