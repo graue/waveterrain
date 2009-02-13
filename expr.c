@@ -7,7 +7,7 @@
 float add(float a, float b) { return a + b; }
 float sub(float a, float b) { return a - b; }
 float mul(float a, float b) { return a * b; }
-float div(float a, float b) { return b == 0.0 ? 0.0 : a / b; }
+float divide(float a, float b) { return b == 0.0 ? 0.0 : a / b; }
 float mod(float a, float b) { return b == 0.0 ? 0.0 : fmodf(a, b); }
 
 const operator_t opers[] =
@@ -15,7 +15,7 @@ const operator_t opers[] =
 	{ "+", 2, { .func2 = add }},
 	{ "-", 2, { .func2 = sub }},
 	{ "*", 2, { .func2 = mul }},
-	{ "/", 2, { .func2 = div }},
+	{ "/", 2, { .func2 = divide }},
 	{ "%", 2, { .func2 = mod }},
 	{ "sin", 1, { .func1 = sinf }},
 	{ "cos", 1, { .func1 = cosf }}
