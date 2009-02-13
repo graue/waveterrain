@@ -1,5 +1,8 @@
 #include <math.h>
+#include <err.h>
 #include "SDL.h"
+#include "sndlib.h"
+#include "main.h"
 #include "expr.h"
 #include "parse.h"
 
@@ -9,19 +12,60 @@
 #define DBTORAT(x) exp((x) * M_LN10_OVER_20)
 #define DC_OFFSET 1.19209290E-07F /* <float.h>'s FLT_EPSILON */
 
+expr_t *terrain;
+float x, y; // current location of pickup over terrain
+float angledeg; // angle, in degrees, that pickup is moving
+float speed; // speed which pickup moves PER SECOND
+
+static const char *terrain_expr_str = 
+"(+ (+ (+ (sin (* (* 2 pi ) y))"
+"         (sin (* (* 2 pi ) (* y 2)))"
+"      (+ (sin (* (* 2 pi ) (* y 3))"
+"         (sin (* (* 2 pi ) (* y 4)))))"
+"   (+ (+ (sin (* (* 2 pi ) (* y 5)))"
+"         (sin (* (* 2 pi ) (* y 6)))"
+"      (+ (sin (* (* 2 pi ) (* y 7))"
+"         (sin (* (* 2 pi ) (* y 8)))))))";
+
+static float eval_terrain_at(float x, float y)
+{
+	return sin(evaluate(terrain, x, y, 0.0 /* time not used */));
+}
+
 void action_init(void)
 {
-	// TODO: init expressions etc.
+	terrain = parse(terrain_expr_str, NULL);
+	if (terrain == NULL)
+		errx(1, "terrain string wouldn't parse");
+	x = y = 0.0;
+	angledeg = 0.0;
+	speed = 1.0;
 }
 
 void action_control(float rotation)
 {
-	// TODO
+	angledeg += rotation;
+	if (angledeg < -180.0) angledeg += 360.0;
+	else if (angledeg >= 180.0) angledeg -= 360.0;
 }
 
-void action_writesamples(int fd, int numframes)
+void action_writesamples(int numframes)
 {
-	// TODO
+	float dx, dy; // x, y movement per sample frame
+	int ix;
+	float f;
+
+	dx = cos(angledeg * M_PI / 180.0) * speed / RATE;
+	dy = sin(angledeg * M_PI / 180.0) * speed / RATE;
+
+	for (ix = 0; ix < numframes; ix++)
+	{
+		x += dx;
+		y += dy;
+
+		f = eval_terrain_at(x, y);
+		snd_writesample(f * 32768.0); // TODO: gain etc?
+	}
 }
 
 // put pixel macro - assumes surface is already locked

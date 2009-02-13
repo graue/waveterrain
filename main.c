@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 			int numsamps = snd_space();
 			if (numsamps == 0 && !snd_writewillblock())
 				numsamps = blocksize;
-			action_writesamples(sndlib_fd, numsamps);
+			action_writesamples(numsamps);
 		}
 
 		nowtime = get_usecs();
