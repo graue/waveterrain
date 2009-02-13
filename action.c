@@ -86,8 +86,39 @@ void action_writesamples(int numframes)
 	*bufp = color; \
 }
 
+// zoom such that this many seconds of straight vertical/horizontal travel
+// (whichever dimension is smaller)
+// are visible at once
+#define ZOOM_SECS 10
+
 // surface should be locked (if needed) prior to calling this
 void action_dodisplay(SDL_Surface *disp, int w, int h)
 {
-	// TODO
+	float scrtoplanemul;
+	float planeleft, planetop;
+	int scrx, scry;
+	float f;
+	Uint8 intensity; // color intensity 0-255
+
+	scrtoplanemul = ZOOM_SECS * speed / (w < h ? w : h);
+	planeleft = x - (0.5*w / scrtoplanemul);
+	planetop = y - (0.5*h / scrtoplanemul);
+
+	for (scrx = 0; scrx < w; scrx++)
+	for (scry = 0; scry < h; scry++)
+	{
+		f = eval_terrain_at(planeleft + scrx*scrtoplanemul,
+			planetop + scry*scrtoplanemul);
+
+		// XXX this SHOULDN'T really be necessary if eval_terrain_at
+		// returns values in [-1.0, 1.0] as it ought to
+		if (f < -1.0) f = -1.0;
+		if (f > 1.0) f = 1.0;
+
+		f += 1.0;
+		f *= 255.9 / 2.0;
+		intensity = (Uint8)f;
+
+		PUTPIXEL16(disp, scrx, scry, intensity, intensity, intensity);
+	}
 }
