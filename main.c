@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	pfd.fd = sndlib_fd;
 	pfd.events = POLLOUT;
 
-	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_JOYSTICK) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
 		errx(1, "SDL init error: %s", SDL_GetError());
 	atexit(SDL_Quit);
 	joy = SDL_JoystickOpen(0);
