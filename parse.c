@@ -30,7 +30,7 @@ static char *nexttoken(const char *str, int *skipped)
 
 	memcpy(buf, str, len);
 	buf[len+1] = '\0';
-	*skipped = len;
+	if (skipped != NULL) *skipped = len;
 
 	return buf;
 }
@@ -62,7 +62,7 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = atof(token);
-		*skipped = p - str;
+		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 
@@ -70,26 +70,26 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = PI;
-		*skipped = p - str;
+		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 
 	if (!strcmp(token, "x"))
 	{
 		myexpr->type = EXPR_X;
-		*skipped = p - str;
+		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 	if (!strcmp(token, "y"))
 	{
 		myexpr->type = EXPR_Y;
-		*skipped = p - str;
+		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 	if (!strcmp(token, "time"))
 	{
 		myexpr->type = EXPR_T;
-		*skipped = p - str;
+		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 
@@ -119,7 +119,7 @@ expr_t *parse(const char *str, int *skipped)
 				}
 				myexpr->details.op.args[1] = arg;
 			}
-			*skipped = (p - str);
+			if (skipped != NULL) *skipped = p - str;
 			return myexpr;
 		}
 	}
