@@ -11,13 +11,18 @@
 // to number of chars at beginning of str
 // that were consumed
 
+static int isignored(char c)
+{
+	return isspace(c) || c == '(' || c == ')';
+}
+
 // note: cannot be called recursively, returned token is in temp storage
 static char *nexttoken(const char *str, int *skipped)
 {
 	static char buf[999];
 	int len = 0;
 
-	while (buf[len] != '\0' && !isspace(buf[len])
+	while (buf[len] != '\0' && !isignored(buf[len])
 		&& len+1 < (int)sizeof buf)
 	{
 		len++;
@@ -43,7 +48,7 @@ expr_t *parse(const char *str, int *skipped)
 	int ix;
 
 	// skip leading spaces
-	while (*p != '\0' && !isspace(*p))
+	while (*p != '\0' && !isignored(*p))
 		p++;
 
 	token = nexttoken(str, &numskipped);
