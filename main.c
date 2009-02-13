@@ -5,6 +5,7 @@
 #include "SDL.h"
 #include "main.h"
 #include "sndlib.h"
+#include "action.h"
 
 extern char *optarg;
 extern int optind;
@@ -18,13 +19,6 @@ static void usage(void)
 {
 	fprintf(stderr, "usage: %s [-f device]\n", __progname);
 	exit(EXIT_FAILURE);
-}
-
-// put pixel macro - assumes surface is already locked
-#define PUTPIXEL16(surf,x,y,r,g,b) { \
-	Uint32 color = SDL_MapRGB((surf)->format, (r), (g), (b)); \
-	Uint16 *bufp = (Uint16 *)(surf)->pixels + (y)*(surf)->pitch/2 + (x); \
-	*bufp = color; \
 }
 
 int main(int argc, char *argv[])
@@ -63,6 +57,7 @@ int main(int argc, char *argv[])
 	if (screen->format->BytesPerPixel != 2)
 		errx(1, "set video mode is not 16-bit!");
 	mustlock = SDL_MUSTLOCK(screen);
+	action_init();
 
 	for (;;)
 	{
@@ -77,7 +72,7 @@ int main(int argc, char *argv[])
 			int numsamps = snd_space();
 			if (numsamps == 0 && !snd_writewillblock())
 				numsamps = blocksize;
-			// TODO: write numsamps samples
+			action_writesamples(sndlib_fd, numsamps);
 		}
 
 		// TODO: read input (sometimes?)
