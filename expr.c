@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include "expr.h"
@@ -46,4 +47,15 @@ float evaluate(expr_t *expr, float x, float y, float t)
 
 	f2 = evaluate(expr->details.op.args[1], x, y, t);
 	return oper->func.func2(f1, f2);
+}
+
+void free_expr(expr_t *expr)
+{
+	if (expr->type == EXPR_OP)
+	{
+		free_expr(expr->details.op.args[0]);
+		if (expr->details.op.oper->nargs == 2)
+			free_expr(expr->details.op.args[1]);
+	}
+	free(expr);
 }

@@ -33,3 +33,4 @@ typedef struct expr_s
 } expr_t;
 
 float evaluate(expr_t *expr, float x, float y, float t);
+void free_expr(expr_t *expr);
