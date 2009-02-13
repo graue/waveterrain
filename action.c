@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <math.h>
 #include <err.h>
 #include "SDL.h"
@@ -32,6 +33,8 @@ static float eval_terrain_at(float x, float y)
 	return sin(evaluate(terrain, x, y, 0.0 /* time not used */));
 }
 
+FILE *audiodump;
+
 void action_init(void)
 {
 	terrain = parse(terrain_expr_str, NULL);
@@ -39,7 +42,9 @@ void action_init(void)
 		errx(1, "terrain string wouldn't parse");
 	x = y = 0.0;
 	angledeg = 0.0;
-	speed = 1.0;
+	speed = 500.0;
+
+	audiodump = fopen("audiodump.f32", "wb");
 }
 
 void action_control(float rotation)
@@ -53,7 +58,7 @@ void action_writesamples(int numframes)
 {
 	float dx, dy; // x, y movement per sample frame
 	int ix;
-	float f;
+	float f[2];
 
 	dx = cos(angledeg * M_PI / 180.0) * speed / RATE;
 	dy = sin(angledeg * M_PI / 180.0) * speed / RATE;
@@ -63,8 +68,14 @@ void action_writesamples(int numframes)
 		x += dx;
 		y += dy;
 
-		f = eval_terrain_at(x, y);
-		snd_writesample(f * 32768.0); // TODO: gain etc?
+		f[0] = f[1] = eval_terrain_at(x, y);
+		// TODO: gain etc?
+
+		snd_writesample(f[0] * 32768.0);
+		snd_writesample(f[1] * 32768.0);
+
+		if (audiodump != NULL)
+			fwrite(f, sizeof f[0], 2, audiodump);
 	}
 }
 
