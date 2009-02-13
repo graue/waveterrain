@@ -62,6 +62,9 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = atof(token);
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " %f", myexpr->details.num);
+#endif
 		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
@@ -70,6 +73,9 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = PI;
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " %f", myexpr->details.num);
+#endif
 		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
@@ -77,18 +83,27 @@ expr_t *parse(const char *str, int *skipped)
 	if (!strcmp(token, "x"))
 	{
 		myexpr->type = EXPR_X;
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " x");
+#endif
 		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 	if (!strcmp(token, "y"))
 	{
 		myexpr->type = EXPR_Y;
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " y");
+#endif
 		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
 	if (!strcmp(token, "time"))
 	{
 		myexpr->type = EXPR_T;
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " t");
+#endif
 		if (skipped != NULL) *skipped = p - str;
 		return myexpr;
 	}
@@ -99,6 +114,9 @@ expr_t *parse(const char *str, int *skipped)
 		{
 			myexpr->type = EXPR_OP;
 			myexpr->details.op.oper = &opers[ix];
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " %s (", opers[ix].name);
+#endif
 			arg = parse(p, &numskipped);
 			p += numskipped;
 			if (arg == NULL)
@@ -119,6 +137,9 @@ expr_t *parse(const char *str, int *skipped)
 				}
 				myexpr->details.op.args[1] = arg;
 			}
+#ifdef PARSE_DEBUG
+		fprintf(stderr, " )");
+#endif
 			if (skipped != NULL) *skipped = p - str;
 			return myexpr;
 		}
