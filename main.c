@@ -120,9 +120,62 @@ quit:
 	return 0;
 }
 
+// joystick button flags
+#define JOYBTN_1 (1<<0) 
+#define JOYBTN_2 (1<<1)
+#define JOYBTN_3 (1<<2)
+#define JOYBTN_4 (1<<3)
+#define JOYBTN_5 (1<<4)
+#define JOYBTN_6 (1<<5)
+#define JOYBTN_NONE 0
+
+// axes - XXX specific to my joystick
+#define JOYAXIS_UPDN 1
+#define JOYAXIS_LR 0
+#define JOYAXIS_BASE 2
+#define JOYAXIS_ROTATE 3
+ 
+static int joybuttonstate(SDL_Joystick *joy)
+{
+	int state = 0;
+	// XXX what if fewer than 6 buttons?
+	if (SDL_JoystickGetButton(joy, 0)) state |= JOYBTN_1;
+	if (SDL_JoystickGetButton(joy, 1)) state |= JOYBTN_2;
+	if (SDL_JoystickGetButton(joy, 2)) state |= JOYBTN_3;
+	if (SDL_JoystickGetButton(joy, 3)) state |= JOYBTN_4;
+	if (SDL_JoystickGetButton(joy, 4)) state |= JOYBTN_5;
+	if (SDL_JoystickGetButton(joy, 5)) state |= JOYBTN_6;
+	return state;
+}
+
+// XXX may be specific to my Saitek joystick?
+#define JOYAXIS_MIN -1.0
+#define JOYAXIS_MAX (254.0 / 256.0) /* 0.9921875 */
+
+static float scaledjoyaxis(SDL_Joystick *joy, int axis)
+{
+	float axval = SDL_JoystickGetAxis(joy, axis) / 32768.0;
+	/* scale to [-1.0, 1.0] */
+	if (axval < 0)
+		axval = axval / JOYAXIS_MIN * -1.0;
+	else
+		axval = axval / JOYAXIS_MAX * 1.0;
+	return axval;
+}
+
+// hold buttons 5 and 6 to quit
+#define JOYBTN_QUIT (JOYBTN_5|JOYBTN_6) 
+
 // returns 1 if time to quit, 0 otherwise
 int take_joystick_input(SDL_Joystick *joy)
 {
-	// TODO
+	int buttons;
+
+	buttons = joybuttonstate(joy);
+	if (buttons == JOYBTN_QUIT)
+		return 1;
+
+	action_control(scaledjoyaxis(joy, JOYAXIS_ROTATE));
+
 	return 0;
 }
