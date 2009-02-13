@@ -62,6 +62,7 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = atof(token);
+		myexpr->varcount = 0;
 #ifdef PARSE_DEBUG
 		fprintf(stderr, " %f", myexpr->details.num);
 #endif
@@ -73,6 +74,7 @@ expr_t *parse(const char *str, int *skipped)
 	{
 		myexpr->type = EXPR_CONSTANT;
 		myexpr->details.num = PI;
+		myexpr->varcount = 0;
 #ifdef PARSE_DEBUG
 		fprintf(stderr, " %f", myexpr->details.num);
 #endif
@@ -83,6 +85,7 @@ expr_t *parse(const char *str, int *skipped)
 	if (!strcmp(token, "x"))
 	{
 		myexpr->type = EXPR_X;
+		myexpr->varcount = 1;
 #ifdef PARSE_DEBUG
 		fprintf(stderr, " x");
 #endif
@@ -92,6 +95,7 @@ expr_t *parse(const char *str, int *skipped)
 	if (!strcmp(token, "y"))
 	{
 		myexpr->type = EXPR_Y;
+		myexpr->varcount = 1;
 #ifdef PARSE_DEBUG
 		fprintf(stderr, " y");
 #endif
@@ -101,6 +105,7 @@ expr_t *parse(const char *str, int *skipped)
 	if (!strcmp(token, "time"))
 	{
 		myexpr->type = EXPR_T;
+		myexpr->varcount = 1;
 #ifdef PARSE_DEBUG
 		fprintf(stderr, " t");
 #endif
@@ -125,6 +130,7 @@ expr_t *parse(const char *str, int *skipped)
 				return NULL;
 			}
 			myexpr->details.op.args[0] = arg;
+			myexpr->varcount = arg->varcount;
 			if (opers[ix].nargs == 2)
 			{
 				arg = parse(p, &numskipped);
@@ -135,6 +141,7 @@ expr_t *parse(const char *str, int *skipped)
 					free(myexpr);
 					return NULL;
 				}
+				myexpr->varcount += arg->varcount;
 				myexpr->details.op.args[1] = arg;
 			}
 #ifdef PARSE_DEBUG

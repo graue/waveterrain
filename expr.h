@@ -23,6 +23,7 @@ enum { EXPR_CONSTANT, EXPR_X, EXPR_Y, EXPR_T, EXPR_OP };
 typedef struct expr_s
 {
 	int type;
+	int varcount; // number of variables in this and all subtrees
 	union {
 		float num; // EXPR_CONSTANT
 		struct {
