@@ -22,9 +22,6 @@ extern char *__progname;
 // Joystick update tick length in microseconds (milliseconds * 1000)
 #define JOYTICKLEN (1000000 / JOYTICKS)
 
-// max rotate speed in +/- degrees per second
-#define MAX_ROTATE_SPEED 360.0
-
 static void usage(void)
 {
 	fprintf(stderr, "usage: %s [-f device]\n", __progname);
@@ -185,8 +182,7 @@ int take_joystick_input(SDL_Joystick *joy)
 	if (buttons == JOYBTN_QUIT)
 		return 1;
 
-	action_control(scaledjoyaxis(joy, JOYAXIS_ROTATE)
-		* MAX_ROTATE_SPEED / JOYTICKS);
+	action_control(scaledjoyaxis(joy, JOYAXIS_ROTATE));
 
 	return 0;
 }

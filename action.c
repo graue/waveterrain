@@ -16,6 +16,7 @@
 expr_t *terrain;
 float x, y; // current location of pickup over terrain
 float angledeg; // angle, in degrees, that pickup is moving
+float angleturn; // current angle turn speed in signed degrees/sec
 float speed; // speed which pickup moves PER SECOND
 
 static const char *terrain_expr_str = 
@@ -42,31 +43,38 @@ void action_init(void)
 		errx(1, "terrain string wouldn't parse");
 	x = y = 0.0;
 	angledeg = 0.0;
+	angleturn = 360.0;
 	speed = 500.0;
 
 	audiodump = fopen("audiodump.f32", "wb");
 }
 
+// max angle turn change in degrees/sec/sec
+#define ANGLE_ACCEL 10.0
+
+// rotation is [-1.0, 1.0]
 void action_control(float rotation)
 {
-	angledeg += rotation;
-	if (angledeg < -180.0) angledeg += 360.0;
-	else if (angledeg >= 180.0) angledeg -= 360.0;
+	angleturn += ANGLE_ACCEL * rotation;
 }
 
 void action_writesamples(int numframes)
 {
-	float dx, dy; // x, y movement per sample frame
+	float anglerad; // angle in radians
+	float d_angle; // angle turn in radians per sample frame
+	float speedsamp; // speed in units per sample frame
 	int ix;
 	float f[2];
 
-	dx = cos(angledeg * M_PI / 180.0) * speed / RATE;
-	dy = sin(angledeg * M_PI / 180.0) * speed / RATE;
+	anglerad = angledeg * M_PI / 180.0;
+	d_angle = angleturn * M_PI / 180.0 / RATE;
+	speedsamp = speed / RATE;
 
 	for (ix = 0; ix < numframes; ix++)
 	{
-		x += dx;
-		y += dy;
+		anglerad += d_angle;
+		x += cos(anglerad) * speedsamp;
+		y += sin(anglerad) * speedsamp;
 
 		f[0] = f[1] = eval_terrain_at(x, y);
 		// TODO: gain etc?
@@ -77,6 +85,8 @@ void action_writesamples(int numframes)
 		if (audiodump != NULL)
 			fwrite(f, sizeof f[0], 2, audiodump);
 	}
+
+	angledeg = anglerad * 180.0 / M_PI;
 }
 
 // put pixel macro - assumes surface is already locked
