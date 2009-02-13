@@ -67,7 +67,8 @@ void action_init(void)
 #define ANGLE_ACCEL 10.0
 
 // each axis is [-1.0, 1.0]
-void action_control(float rotation, float lever, float updn, float lr)
+void action_control(float rotation, float lever, float updn, float lr,
+	int buttons)
 {
 	angleturn += ANGLE_ACCEL * rotation;
 	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);

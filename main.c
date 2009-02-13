@@ -129,15 +129,6 @@ quit:
 	return 0;
 }
 
-// joystick button flags
-#define JOYBTN_1 (1<<0) 
-#define JOYBTN_2 (1<<1)
-#define JOYBTN_3 (1<<2)
-#define JOYBTN_4 (1<<3)
-#define JOYBTN_5 (1<<4)
-#define JOYBTN_6 (1<<5)
-#define JOYBTN_NONE 0
-
 // axes - XXX specific to my joystick
 #define JOYAXIS_UPDN 1
 #define JOYAXIS_LR 0
@@ -187,7 +178,8 @@ int take_joystick_input(SDL_Joystick *joy)
 	action_control(scaledjoyaxis(joy, JOYAXIS_ROTATE),
 		scaledjoyaxis(joy, JOYAXIS_BASE),
 		scaledjoyaxis(joy, JOYAXIS_UPDN),
-		scaledjoyaxis(joy, JOYAXIS_LR));
+		scaledjoyaxis(joy, JOYAXIS_LR),
+		buttons);
 
 	return 0;
 }
