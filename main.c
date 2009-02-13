@@ -126,4 +126,3 @@ int take_joystick_input(SDL_Joystick *joy)
 	// TODO
 	return 0;
 }
-
