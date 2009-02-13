@@ -24,6 +24,7 @@ typedef struct expr_s
 {
 	int type;
 	int varcount; // number of variables in this and all subtrees
+	int depthcount; // depth of deepest leaf in distance from this node
 	union {
 		float num; // EXPR_CONSTANT
 		struct {

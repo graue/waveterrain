@@ -57,6 +57,7 @@ expr_t *parse(const char *str, int *skipped)
 		return NULL;
 
 	myexpr = xm(sizeof *myexpr, 1);
+	myexpr->depthcount = 0;
 
 	if (isdigit(token[0]))
 	{
@@ -131,6 +132,7 @@ expr_t *parse(const char *str, int *skipped)
 			}
 			myexpr->details.op.args[0] = arg;
 			myexpr->varcount = arg->varcount;
+			myexpr->depthcount = arg->depthcount;
 			if (opers[ix].nargs == 2)
 			{
 				arg = parse(p, &numskipped);
@@ -142,8 +144,11 @@ expr_t *parse(const char *str, int *skipped)
 					return NULL;
 				}
 				myexpr->varcount += arg->varcount;
+				if (arg->depthcount > myexpr->depthcount)
+					myexpr->depthcount = arg->depthcount;
 				myexpr->details.op.args[1] = arg;
 			}
+			myexpr->depthcount++;
 #ifdef PARSE_DEBUG
 		fprintf(stderr, " )");
 #endif
