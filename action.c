@@ -102,20 +102,22 @@ void action_writesamples(int numframes)
 #define ZOOM_SECS 10
 
 // surface should be locked (if needed) prior to calling this
-void action_dodisplay(SDL_Surface *disp, int w, int h)
+void action_dodisplay(SDL_Surface *disp, int w, int h, int lines)
 {
 	float scrtoplanemul;
 	float planeleft, planetop;
 	int scrx, scry;
 	float f;
 	Uint8 intensity; // color intensity 0-255
+	static int row = 0;
+	int endrow = (row + lines) % h;
 
 	scrtoplanemul = ZOOM_SECS * speed / (w < h ? w : h);
 	planeleft = x - (0.5*w / scrtoplanemul);
 	planetop = y - (0.5*h / scrtoplanemul);
 
 	for (scrx = 0; scrx < w; scrx++)
-	for (scry = 0; scry < h; scry++)
+	for (scry = row; scry != endrow; scry = (scry+1) % h)
 	{
 		f = eval_terrain_at(planeleft + scrx*scrtoplanemul,
 			planetop + scry*scrtoplanemul);
@@ -131,4 +133,6 @@ void action_dodisplay(SDL_Surface *disp, int w, int h)
 
 		PUTPIXEL16(disp, scrx, scry, intensity, intensity, intensity);
 	}
+
+	row = endrow;
 }
