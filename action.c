@@ -25,8 +25,11 @@ float angleturn; // current angle turn speed in signed degrees/sec
 float speed; // speed which pickup moves PER SECOND
 float amp; // overall gain (multiplier, not dB)
 
+float pan, leftamp, rightamp;
+
 #define MAXAMPDB -10
 #define AMPDBRANGE 40
+
 
 // returns 1 if success 0 if fail
 static int addterrain(const char *expr_str, int *skipped)
@@ -96,6 +99,8 @@ void action_init(void)
 	angleturn = 360.0;
 	speed = 500.0;
 	amp = DBTORAT(MAXAMPDB - AMPDBRANGE);
+	pan = 0.0;
+	leftamp = rightamp = 1.0;
 
 	audiodump = fopen("audiodump.f32", "wb");
 }
@@ -133,6 +138,10 @@ void action_control(float rotation, float lever, float updn, float lr,
 	angleturn += ANGLE_ACCEL * rotation;
 	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);
 	if (updn != 0.0) speed *= pow(2, updn / JOYTICKS);
+
+	pan += lr * 10.0 / JOYTICKS;
+	leftamp = cos(pan * M_PI/180.0) + sin(pan * M_PI/180.0);
+	rightamp = cos(pan * M_PI/180.0) - sin(pan * M_PI/180.0);
 }
 
 void action_writesamples(int numframes)
@@ -154,6 +163,8 @@ void action_writesamples(int numframes)
 		y += sin(anglerad) * speedsamp;
 
 		f[0] = f[1] = eval_terrain_at(x, y);
+		f[0] *= leftamp;
+		f[1] *= rightamp;
 		// TODO: gain etc?
 
 		snd_writesample(f[0] * 32768.0);
