@@ -19,7 +19,7 @@ extern char *__progname;
 #define SCRLINES 10 /* lines to update each time */
 
 // Joystick update ticks per second; display is updated every other tick
-#define JOYTICKS 100 /* = 10 ms */
+// #define JOYTICKS 100 /* = 10 ms */
 
 // Joystick update tick length in microseconds (milliseconds * 1000)
 #define JOYTICKLEN (1000000 / JOYTICKS)

@@ -40,6 +40,16 @@ static int addterrain(const char *expr_str, int *skipped)
 	return 1;
 }
 
+// returns 1 if success 0 if fail
+static int addterrainbyexpr(expr_t *expr)
+{
+	if (numterrains == MAXTERRAINS)
+		return 0;
+	terrains[numterrains] = expr;
+	numterrains++;
+	return 1;
+}
+
 char terrainexprbuf[102400];
 
 // returns values in [-1, 1]
@@ -104,15 +114,25 @@ void action_control(float rotation, float lever, float updn, float lr,
 	lastbuttons = buttons;
 
 	if (newbuttons & JOYBTN_1)
+	{
+		expr_t *mutated;
+		mutated = copy_expr(terrains[tindex]);
+		mutate(mutated);
+		if (!addterrainbyexpr(mutated))
+			free_expr(mutated);
+		else
+			tindex = numterrains-1;
+	}
+	else if (newbuttons & JOYBTN_2) // mutate in-place
 		mutate(terrains[tindex]);
-	if (newbuttons & JOYBTN_3)
+	else if (newbuttons & JOYBTN_3)
 		tindex = (tindex+numterrains-1) % numterrains;
-	if (newbuttons & JOYBTN_4)
+	else if (newbuttons & JOYBTN_4)
 		tindex = (tindex+1) % numterrains;
 
 	angleturn += ANGLE_ACCEL * rotation;
 	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);
-	if (updn != 0.0) speed *= pow(2, updn);
+	if (updn != 0.0) speed *= pow(2, updn / JOYTICKS);
 }
 
 void action_writesamples(int numframes)

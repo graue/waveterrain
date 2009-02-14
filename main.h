@@ -1,5 +1,7 @@
 #define RATE 48000
 
+#define JOYTICKS 100 /* 100 ticks per second = 10 ms */
+
 // joystick button flags
 #define JOYBTN_1 (1<<0)
 #define JOYBTN_2 (1<<1) 

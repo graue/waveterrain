@@ -55,7 +55,7 @@ static void update_expr_counts(expr_t *expr)
 }
 
 // recursively deep-copy an expression, all subtrees etc.
-static expr_t *copy_expr(expr_t *orig)
+expr_t *copy_expr(const expr_t *orig)
 {
 	expr_t *new;
 
