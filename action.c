@@ -30,6 +30,8 @@ float pan, leftamp, rightamp;
 #define MAXAMPDB -10
 #define AMPDBRANGE 40
 
+#define DELAYSAMPS (RATE*33/1000)
+float delaybin[2*DELAYSAMPS];
 
 // returns 1 if success 0 if fail
 static int addterrain(const char *expr_str, int *skipped)
@@ -73,6 +75,7 @@ FILE *audiodump;
 
 void action_init(void)
 {
+//todo delaysamps clear
 	int numskipped;
 	const char *p;
 	FILE *fp;
@@ -144,6 +147,8 @@ void action_control(float rotation, float lever, float updn, float lr,
 	rightamp = cos(pan * M_PI/180.0) - sin(pan * M_PI/180.0);
 }
 
+int delaypos = 0;
+
 void action_writesamples(int numframes)
 {
 	float anglerad; // angle in radians
@@ -151,6 +156,7 @@ void action_writesamples(int numframes)
 	float speedsamp; // speed in units per sample frame
 	int ix;
 	float f[2];
+	float f0[2];
 
 	anglerad = angledeg * M_PI / 180.0;
 	d_angle = angleturn * M_PI / 180.0 / RATE;
@@ -162,10 +168,18 @@ void action_writesamples(int numframes)
 		x += cos(anglerad) * speedsamp;
 		y += sin(anglerad) * speedsamp;
 
-		f[0] = f[1] = eval_terrain_at(x, y);
-		f[0] *= leftamp;
-		f[1] *= rightamp;
+		f0[0] = f0[1] = eval_terrain_at(x, y);
+		f0[0] *= leftamp;
+		f0[1] *= rightamp;
 		// TODO: gain etc?
+
+		// delay
+		f[0] = f0[0] + delaybin[2*delaypos];
+		f[1] = f0[1] + delaybin[2*delaypos+1];
+		delaybin[2*delaypos] = delaybin[2*delaypos]*0.33+f0[0];
+		delaybin[2*delaypos+1] = delaybin[2*delaypos+1]*0.33+f0[1];
+		delaypos++;
+		if (delaypos >= DELAYSAMPS) delaypos = 0;
 
 		snd_writesample(f[0] * 32768.0);
 		snd_writesample(f[1] * 32768.0);
