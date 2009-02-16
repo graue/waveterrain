@@ -75,7 +75,8 @@ int main(int argc, char *argv[])
 	numbuttons = SDL_JoystickNumButtons(joy);
 	numaxes = SDL_JoystickNumAxes(joy);
 
-	screen = SDL_SetVideoMode(SCRWIDTH, SCRHEIGHT, 16, SDL_SWSURFACE);
+	screen = SDL_SetVideoMode(SCRWIDTH, SCRHEIGHT, 16,
+		SDL_SWSURFACE|SDL_FULLSCREEN);
 	if (screen == NULL)
 		errx(1, "can't set video mode: %s", SDL_GetError());
 	if (screen->format->BytesPerPixel != 2)
