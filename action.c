@@ -204,7 +204,7 @@ void action_writesamples(int numframes)
 #define ZOOM_SECS 10
 
 // surface should be locked (if needed) prior to calling this
-void action_dodisplay(SDL_Surface *disp, int w, int h, int lines)
+void action_dodisplay(SDL_Surface *disp, int w, int h, int lines, int magnify)
 {
 	float scrtoplanemul;
 	float planeleft, planetop;
@@ -213,6 +213,7 @@ void action_dodisplay(SDL_Surface *disp, int w, int h, int lines)
 	Uint8 intensity; // color intensity 0-255
 	static int row = 0;
 	int endrow = (row + lines) % h;
+	SDL_Rect dst;
 
 	scrtoplanemul = ZOOM_SECS * speed / (w < h ? w : h);
 	planeleft = x - (0.5*w / scrtoplanemul);
@@ -228,7 +229,12 @@ void action_dodisplay(SDL_Surface *disp, int w, int h, int lines)
 		f *= 255.9 / 2.0;
 		intensity = (Uint8)f;
 
-		PUTPIXEL16(disp, scrx, scry, intensity, intensity, intensity);
+		dst.x = scrx*magnify;
+		dst.y = scry*magnify;
+		dst.w = magnify;
+		dst.h = magnify;
+		SDL_FillRect(disp, &dst, SDL_MapRGB(disp->format,
+			intensity, intensity, intensity));
 	}
 
 	row = endrow;

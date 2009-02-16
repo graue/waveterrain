@@ -14,8 +14,11 @@ extern int optind;
 extern char *__progname;
 
 #define BLKSZ 512 /* desired audio blocksize */
-#define SCRWIDTH 100
-#define SCRHEIGHT 100
+#define VIRTWIDTH 100
+#define VIRTHEIGHT 100
+#define MAGNIFY 6
+#define SCRWIDTH (VIRTWIDTH*MAGNIFY)
+#define SCRHEIGHT (VIRTHEIGHT*MAGNIFY)
 #define SCRLINES 10 /* lines to update each time */
 
 // Joystick update ticks per second; display is updated every other tick
@@ -113,15 +116,8 @@ int main(int argc, char *argv[])
 
 		if (tickspassed & 1)
 		{
-			if (mustlock && SDL_LockSurface(screen) < 0)
-			{
-				errx(1, "can't lock surface: %s",
-					SDL_GetError());
-			}
-			action_dodisplay(screen, SCRWIDTH, SCRHEIGHT,
-				SCRLINES);
-			if (mustlock)
-				SDL_UnlockSurface(screen);
+			action_dodisplay(screen, VIRTWIDTH, VIRTHEIGHT,
+				SCRLINES, MAGNIFY);
 			SDL_UpdateRect(screen, 0, 0, 0, 0);
 		}
 	}
