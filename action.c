@@ -8,6 +8,11 @@
 #include "parse.h"
 #include "mutate.h"
 
+#undef MIN
+#define MIN(x,y) ((x)<(y)?(x):(y))
+#undef MAX
+#define MAX(x,y) ((x)>(y)?(x):(y))
+
 #define M_20_OVER_LN10 8.68588963806503655302257838
 #define M_LN10_OVER_20 0.115129254649702284200899573
 #define RATTODB(x) (log(x) * M_20_OVER_LN10)
@@ -210,7 +215,7 @@ void action_dodisplay(SDL_Surface *disp, int w, int h, int lines, int magnify)
 	float planeleft, planetop;
 	int scrx, scry;
 	float f;
-	Uint8 intensity; // color intensity 0-255
+	float intensity; // color intensity [0, 256)
 	static int row = 0;
 	int endrow = (row + lines) % h;
 	SDL_Rect dst;
@@ -227,14 +232,16 @@ void action_dodisplay(SDL_Surface *disp, int w, int h, int lines, int magnify)
 
 		f += 1.0;
 		f *= 255.9 / 2.0;
-		intensity = (Uint8)f;
+		intensity = f;
 
 		dst.x = scrx*magnify;
 		dst.y = scry*magnify;
 		dst.w = magnify;
 		dst.h = magnify;
 		SDL_FillRect(disp, &dst, SDL_MapRGB(disp->format,
-			intensity, intensity, intensity));
+			(Uint8)(MIN(intensity, 128) - 128 * 2.0),
+			0,
+			MAX(intensity, 192)));
 	}
 
 	row = endrow;
