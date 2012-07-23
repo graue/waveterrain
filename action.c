@@ -19,6 +19,11 @@
 #define DBTORAT(x) exp((x) * M_LN10_OVER_20)
 #define DC_OFFSET 1.19209290E-07F /* <float.h>'s FLT_EPSILON */
 
+#define MAX_ANGLE_TURN 360.0
+#define MIN_ANGLE_TURN 0.0
+#define MAXSPEED 50000.0
+#define MINSPEED 0.005
+
 #define MAXTERRAINS 100
 expr_t *terrains[MAXTERRAINS];
 int numterrains = 0;
@@ -144,8 +149,15 @@ void action_control(float rotation, float lever, float updn, float lr,
 		tindex = (tindex+1) % numterrains;
 
 	angleturn += ANGLE_ACCEL * rotation;
+	if (angleturn > MAX_ANGLE_TURN) angleturn = MAX_ANGLE_TURN;
+	else if (angleturn < MIN_ANGLE_TURN) angleturn = MIN_ANGLE_TURN;
 	amp = DBTORAT(MAXAMPDB - (lever + 1.0) / 2.0 * AMPDBRANGE);
-	if (updn != 0.0) speed *= pow(2, updn / JOYTICKS);
+	if (updn != 0.0)
+	{
+		speed *= pow(2, updn/100 / JOYTICKS);
+		if (speed > MAXSPEED) speed = MAXSPEED;
+		else if (speed < MINSPEED) speed = MINSPEED;
+	}
 
 	pan += lr * 10.0 / JOYTICKS;
 	leftamp = cos(pan * M_PI/180.0) + sin(pan * M_PI/180.0);
