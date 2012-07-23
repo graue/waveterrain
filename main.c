@@ -19,7 +19,7 @@ extern char *__progname;
 #define MAGNIFY 6
 #define SCRWIDTH (VIRTWIDTH*MAGNIFY)
 #define SCRHEIGHT (VIRTHEIGHT*MAGNIFY)
-#define SCRLINES 10 /* lines to update each time */
+#define SCRLINES 5 /* lines to update each time */
 
 // Joystick update ticks per second; display is updated every other tick
 // #define JOYTICKS 100 /* = 10 ms */
