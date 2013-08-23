@@ -6,9 +6,8 @@
  * can't be done, but on others, it can and should.
  */
 
-#ifdef _WIN32
 #include <stddef.h>
-#else
+#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/time.h>
 #endif
