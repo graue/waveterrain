@@ -1,0 +1,5 @@
+*.swp
+*~
+/terrain
+*.o
+/audiodump.f32
