@@ -2,7 +2,6 @@
 #include <math.h>
 #include <err.h>
 #include "SDL.h"
-#include "sndlib.h"
 #include "main.h"
 #include "expr.h"
 #include "parse.h"
@@ -90,6 +89,7 @@ void action_init(void)
 	const char *p;
 	FILE *fp;
 
+	SDL_LockAudio();
 	memset(terrainexprbuf, 0, sizeof terrainexprbuf);
 	fp = fopen("terrains.txt", "r");
 	if (fp == NULL)
@@ -116,6 +116,7 @@ void action_init(void)
 	leftamp = rightamp = 1.0;
 
 	audiodump = fopen("audiodump.f32", "wb");
+	SDL_UnlockAudio();
 }
 
 // max angle turn change in degrees/sec/sec
@@ -166,6 +167,19 @@ void action_control(float rotation, float lever, float updn, float lr,
 
 int delaypos = 0;
 
+static Sint16 *destp;
+
+static void writesample(Sint16 samp) {
+	*(destp++) = samp;
+}
+
+void action_writesamples(int numframes);
+
+void SDLCALL action_audiocallback(void *userdata, Uint8 *stream, int len) {
+	destp = (Sint16 *)stream;
+	action_writesamples(len /= 4);
+}
+
 void action_writesamples(int numframes)
 {
 	float anglerad; // angle in radians
@@ -198,8 +212,8 @@ void action_writesamples(int numframes)
 		delaypos++;
 		if (delaypos >= DELAYSAMPS) delaypos = 0;
 
-		snd_writesample(f[0] * 32768.0);
-		snd_writesample(f[1] * 32768.0);
+		writesample(f[0] * 32768.0);
+		writesample(f[1] * 32768.0);
 
 		if (audiodump != NULL)
 			fwrite(f, sizeof f[0], 2, audiodump);

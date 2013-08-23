@@ -1,3 +1,5 @@
+/* Important fact: you hold buttons 5 and 6 to quit. */
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -42,34 +44,31 @@ int main(int argc, char *argv[])
 	SDL_Surface *screen;
 	SDL_Joystick *joy;
 	u_int blocksize;
-	struct pollfd pfd;
 	int ch;
 	int tickspassed = 0;
 	int ticks = 0;
 	int mustlock;
-	const char *device = NULL;
 	u_int64_t lasttime, nowtime;
 
 	while ((ch = getopt(argc, argv, "f:")) != -1)
 	{
-		if (ch == 'f') // specify alternate device
-			device = optarg;
-		else usage();
+		if (ch != 'f') // specify alternate device, but not used
+			usage();
 	}
 
 	argc -= optind;
 	argv += optind;
 	if (argc > 0) usage();
 
-	if ((blocksize = snd_openaudio(device, RATE, 2, 16, BLKSZ)) == 0)
-		errx(1, "cannot open audio");
-
-	pfd.fd = sndlib_fd;
-	pfd.events = POLLOUT;
-
 	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
 		errx(1, "SDL init error: %s", SDL_GetError());
 	atexit(SDL_Quit);
+
+	if ((blocksize = snd_openaudio(action_audiocallback, RATE, 2, 16,
+		BLKSZ)) == 0) {
+		errx(1, "cannot open audio");
+	}
+
 	joy = SDL_JoystickOpen(0);
 	if (joy == NULL)
 		errx(1, "SDL joystick open error: %s", SDL_GetError());
@@ -77,7 +76,7 @@ int main(int argc, char *argv[])
 	numaxes = SDL_JoystickNumAxes(joy);
 
 	screen = SDL_SetVideoMode(SCRWIDTH, SCRHEIGHT, 16,
-		SDL_SWSURFACE|SDL_FULLSCREEN);
+		SDL_SWSURFACE);
 	if (screen == NULL)
 		errx(1, "can't set video mode: %s", SDL_GetError());
 	if (screen->format->BytesPerPixel != 2)
@@ -86,23 +85,10 @@ int main(int argc, char *argv[])
 	action_init();
 	lasttime = get_usecs();
 	mt_init((u_int32_t)lasttime);
+	SDL_PauseAudio(0);
 
 	for (;;)
 	{
-		if (poll(&pfd, 1, 0) == -1
-			|| pfd.revents & (POLLERR|POLLHUP|POLLNVAL))
-		{
-			err(1, "poll");
-		}
-
-		if (pfd.revents & POLLOUT)
-		{
-			int numsamps = snd_space();
-			if (numsamps == 0 && !snd_writewillblock())
-				numsamps = blocksize;
-			action_writesamples(numsamps);
-		}
-
 		nowtime = get_usecs();
 		for (ticks = 0; nowtime - lasttime > JOYTICKLEN;
 			ticks++, lasttime += JOYTICKLEN)
@@ -164,7 +150,7 @@ static float scaledjoyaxis(SDL_Joystick *joy, int axis)
 }
 
 // hold buttons 5 and 6 to quit
-#define JOYBTN_QUIT (JOYBTN_5|JOYBTN_6) 
+#define JOYBTN_QUIT (JOYBTN_5|JOYBTN_6)
 
 // returns 1 if time to quit, 0 otherwise
 int take_joystick_input(SDL_Joystick *joy)

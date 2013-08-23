@@ -1,2 +1,2 @@
 #!/bin/sh
-cc -ggdb -W -Wall -lm `sdl-config --cflags --libs` -o terrain *.c
+cc -ggdb *.c -W -Wall -lm `sdl-config --cflags --libs` -o terrain
