@@ -16,7 +16,7 @@ extern char *optarg;
 extern int optind;
 extern char *__progname;
 
-#define BLKSZ 512 /* desired audio blocksize */
+#define BLKSZ 1024 /* desired audio blocksize */
 #define VIRTWIDTH 100
 #define VIRTHEIGHT 100
 #define MAGNIFY 6
