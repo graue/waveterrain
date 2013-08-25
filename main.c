@@ -24,9 +24,6 @@ extern char *__progname;
 #define SCRHEIGHT (VIRTHEIGHT*MAGNIFY)
 #define SCRLINES 5 /* lines to update each time */
 
-// Joystick update ticks per second; display is updated every other tick
-// #define JOYTICKS 100 /* = 10 ms */
-
 // Joystick update tick length in microseconds (milliseconds * 1000)
 #define JOYTICKLEN (1000000 / JOYTICKS)
 
@@ -102,12 +99,18 @@ int main(int argc, char *argv[])
 			if (take_joystick_input(joy) != 0)
 				goto quit;
 
-		if (tickspassed & 1)
+		// Update the screen every other tick.
+		if (tickspassed & 1 || ticks >= 2)
 		{
 			action_dodisplay(screen, VIRTWIDTH, VIRTHEIGHT,
 				SCRLINES, MAGNIFY);
 			SDL_UpdateRect(screen, 0, 0, 0, 0);
 		}
+
+		int64_t time_to_next_tick = lasttime + JOYTICKLEN
+			- get_usecs();
+		if (time_to_next_tick > 11000)
+			SDL_Delay(time_to_next_tick / 1000 - 10);
 	}
 
 quit:
